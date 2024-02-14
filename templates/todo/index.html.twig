@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Todo index{% endblock %}
+
+{% block body %}
+    <h1>Todo index</h1>
+
+    <table class="table">
+
+    {# AJOUT DU NOMBRE DE TODOS #}
+        {% set completedTodosCount = todos|filter(todo => todo.completed)|length %}
+            <p>{{ completedTodosCount }} / {{ todos|length }}</p>
+
+    {# AJOUT DU MESSAGE #}
+        {% if (todos|length - completedTodosCount) < todos|length / 2 %}
+            <p>DEJA ? Tu avances bien continue !!! </p>
+        {% endif %}
+
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Details</th>
+                <th>Completed</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for todo in todos %}
+            <tr>
+                <td>{{ todo.id }}</td>
+                <td>{{ todo.name }}</td>
+                <td>{{ todo.details }}</td>
+                <td>{{ todo.completed ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_todo_show', {'id': todo.id}) }}">Show</a>
+                    <a href="{{ path('app_todo_edit', {'id': todo.id}) }}">Edit</a>
+
+                    {# AJOUT DU BOUTON COMPLETE #}
+                    {% if not todo.completed %}
+                        <form method="post" action="{{ path('app_todo_complete', {'id': todo.id}) }}">
+                            <button type="submit" class="btn btn-success">Complete</button>
+                            {% set csrfToken = csrf_token('complete' ~ todo.id) %}
+                            <input type="hidden" name="_token" value="{{ csrfToken }}">
+                        </form>
+
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_todo_new') }}">Create new</a>
+
+    {# AJOUT DU BOUTON POUR SUPPRIMER LES TODOS COMPLETE #}
+    <form method="get" action="{{ path('app_todo_delete_completed') }}">
+        <button type="submit" class="btn btn-danger">Delete Completed Todos</button>
+    </form>
+
+{% endblock %}
